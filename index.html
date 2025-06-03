@@ -1,1 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理成長互動追蹤系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .session-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .session-date {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .session-count {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+
+        .chat-header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chat-header h2 {
+            color: #1e293b;
+            font-size: 1.6em;
+            margin-bottom: 5px;
+        }
+
+        .chat-subtitle {
+            color: #64748b;
+            font-size: 1em;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            max-width: 85%;
+            position: relative;
+        }
+
+        .message.user {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .message.assistant {
+            background: white;
+            color: #374151;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 8px;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        .input-textarea {
+            width: 100%;
+            min-height: 80px;
+            max-height: 150px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .analysis-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-title {
+            color: #1e293b;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .mood-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .mood-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .mood-value {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .insight-item {
+            background: #fefefe;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .insight-text {
+            color: #374151;
+            line-height: 1.5;
+            font-size: 0.95em;
+        }
+
+        .export-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .export-info {
+            color: #64748b;
+            font-size: 0.9em;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .psychology-tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .analysis-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .summary-content {
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 4;
+            r: 26;
+            cx: 30;
+            cy: 30;
+        }
+
+        .progress-ring .bg {
+            stroke: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-ring .progress {
+            stroke: white;
+            stroke-linecap: round;
+            stroke-dasharray: 163.4;
+            stroke-dashoffset: 81.7;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+            
+            .chat-container {
+                height: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .input-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .send-btn {
+                width: 100%;
+            }
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-style: italic;
+            padding: 10px 15px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #64748b;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 心理成長互動追蹤系統</h1>
+            <p>每日深度對話 · 智能分析 · 自動生成 Obsidian 日記</p>
+            <div class="session-info">
+                <div class="session-date" id="sessionDate"></div>
+                <div class="session-count">今日第 <span id="messageCount">0</span> 次互動</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>💭 今日心理探索對話</h2>
+                    <p class="chat-subtitle">分享您的想法、感受和洞察，系統將自動分析並整理為成長記錄</p>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <div class="message assistant">
+                        <div>歡迎來到您的心理成長空間。今天想要探討什麼主題呢？您可以分享任何想法、感受或最近的經歷，我會陪伴您深入思考並記錄這些珍貴的成長時刻。</div>
+                        <div class="message-time" id="welcomeTime"></div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typingIndicator">
+                    <span>正在思考中</span>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-group">
+                        <textarea 
+                            id="messageInput" 
+                            class="input-textarea" 
+                            placeholder="分享您今天的想法、感受或任何想要探討的主題..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+                    <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                        發送
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="analysis-panel">
+                    <h3 class="panel-title">📊 即時心理分析</h3>
+                    
+                    <div class="mood-indicator">
+                        <span class="mood-label">情緒狀態</span>
+                        <span class="mood-value" id="currentMood">平靜</span>
+                    </div>
+                    
+                    <div class="mood-indicator">
+                        <span class="mood-label">思維複雜度</span>
+                        <span class="mood-value" id="cognitiveLevel">中等</span>
+                    </div>
+                    
+                    <div class="mood-indicator">
+                        <span class="mood-label">自省深度</span>
+                        <span class="mood-value" id="reflectionDepth">深度</span>
+                    </div>
+
+                    <div class="insight-item">
+                        <div class="insight-text" id="currentInsight">
+                            開始對話後，系統將分析您的表達模式和心理狀態變化
+                        </div>
+                    </div>
+
+                    <div class="tag-container" id="psychologyTags">
+                        <span class="psychology-tag">待分析</span>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <h3 class="panel-title">📝 生成 Obsidian 日記</h3>
+                    
+                    <div class="analysis-summary">
+                        <div class="summary-title">今日對話統計</div>
+                        <svg class="progress-ring">
+                            <circle class="bg"></circle>
+                            <circle class="progress" id="progressCircle"></circle>
+                        </svg>
+                        <div class="summary-content" id="todayStats">
+                            互動次數：0<br>
+                            分析深度：準備中<br>
+                            成長指標：待評估
+                        </div>
+                    </div>
+
+                    <button class="export-btn" onclick="generateObsidianEntry()" id="exportBtn" disabled>
+                        生成今日心理成長日記
+                    </button>
+                    
+                    <div class="export-info">
+                        系統將自動整理今日對話內容，生成包含心理分析標籤和成長洞察的 Obsidian 相容日記檔案
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全域變數
+        let conversationData = {
+            date: new Date().toISOString().split('T')[0],
+            messages: [],
+            psychologicalAnalysis: {
+                mood: '平靜',
+                cognitiveComplexity: '中等',
+                reflectionDepth: '準備中',
+                insights: [],
+                tags: []
+            },
+            statistics: {
+                messageCount: 0,
+                wordsCount: 0,
+                emotionalIntensity: 0,
+                topicsDiscussed: []
+            }
+        };
+
+        // 心理分析關鍵詞庫
+        const psychologyKeywords = {
+            emotions: {
+                positive: ['開心', '快樂', '滿足', '感激', '平靜', '放鬆', '興奮', '期待'],
+                negative: ['難過', '焦慮', '擔心', '憤怒', '沮喪', '困惑', '失望', '恐懼'],
+                complex: ['矛盾', '複雜', '混亂', '不確定', '掙扎', '衝突']
+            },
+            cognition: {
+                reflection: ['反思', '思考', '檢討', '回顧', '分析', '理解', '領悟', '覺察'],
+                growth: ['成長', '學習', '進步', '改變', '突破', '發現', '轉變', '提升'],
+                challenge: ['挑戰', '困難', '問題', '阻礙', '瓶頸', '壓力', '考驗']
+            }
+        };
+
+        // 初始化
+        function initializeApp() {
+            updateSessionDate();
+            updateWelcomeTime();
+            setupEventListeners();
+        }
+
+        // 設置事件監聽器
+        function setupEventListeners() {
+            const messageInput = document.getElementById('messageInput');
+            
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+        }
+
+        // 更新會話日期
+        function updateSessionDate() {
+            const now = new Date();
+            const year = now.getFullYear() - 1911;
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            
+            document.getElementById('sessionDate').textContent = 
+                `民國${year}年${month}月${day}日 心理成長記錄`;
+        }
+
+        // 更新歡迎時間
+        function updateWelcomeTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-TW', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('welcomeTime').textContent = timeString;
+        }
+
+        // 發送訊息
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // 生成 YAML 前置資料
+            const yamlFrontMatter = `---
+date: ${dateStr}
+time: ${timeStr}
+mood: ${conversationData.psychologicalAnalysis.mood}
+cognitive_complexity: ${conversationData.psychologicalAnalysis.cognitiveComplexity}
+reflection_depth: ${conversationData.psychologicalAnalysis.reflectionDepth}
+tags: [${conversationData.psychologicalAnalysis.tags.map(tag => `"${tag}"`).join(', ')}]
+session_id: ${dateStr}_${timeStr.replace(/:/g, '')}
+message_count: ${Math.ceil(conversationData.statistics.messageCount / 2)}
+psychological_growth: true
+---`;
+
+            // 生成對話內容
+            let conversationContent = '\n## 💭 今日心理探索對話\n\n';
+            
+            conversationData.messages.forEach((msg, index) => {
+                if (msg.role === 'user') {
+                    conversationContent += `### 🗨️ 我的分享 ${Math.ceil((index + 1) / 2)}\n\n`;
+                    conversationContent += `${msg.content}\n\n`;
+                } else if (msg.role === 'assistant') {
+                    conversationContent += `### 🤝 深度回應\n\n`;
+                    conversationContent += `${msg.content}\n\n`;
+                }
+            });
+
+            // 生成心理分析總結
+            const analysisSection = `
+## 📊 心理狀態分析
+
+**情緒狀態：** ${conversationData.psychologicalAnalysis.mood}
+**思維複雜度：** ${conversationData.psychologicalAnalysis.cognitiveComplexity}
+**自省深度：** ${conversationData.psychologicalAnalysis.reflectionDepth}
+
+### 🏷️ 心理成長標籤
+${conversationData.psychologicalAnalysis.tags.map(tag => `- #${tag.replace(/\s+/g, '_')}`).join('\n')}
+
+### 🌱 成長洞察
+- 今日展現了${conversationData.psychologicalAnalysis.reflectionDepth}的自我探索能力
+- 情緒狀態呈現${conversationData.psychologicalAnalysis.mood}，反映當前心理動態
+- 思維處理達到${conversationData.psychologicalAnalysis.cognitiveComplexity}水平，顯示認知發展狀況
+
+## 📈 成長追蹤指標
+
+**互動深度：** ${Math.ceil(conversationData.statistics.messageCount / 2)} 回合
+**探討主題：** ${conversationData.psychologicalAnalysis.tags.length} 個面向
+**記錄時間：** ${timeStr}
+
+---
+
+## 🔗 相關連結
+- [[心理成長日記索引]]
+- [[${conversationData.psychologicalAnalysis.mood}情緒探索]]
+- [[${conversationData.psychologicalAnalysis.reflectionDepth}自省記錄]]
+
+> 💡 這份記錄由 AI 心理成長追蹤系統自動生成，旨在協助您建立持續的自我覺察和成長軌跡。
+`;
+
+            const fullContent = yamlFrontMatter + conversationContent + analysisSection;
+
+            // 下載檔案
+            const blob = new Blob([fullContent], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `心理成長日記_${dateStr}_${timeStr.replace(/:/g, '')}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // 顯示成功訊息
+            alert('✅ Obsidian 日記已生成並下載！\n\n請將此檔案放入您的 Obsidian vault 中，即可開始使用雙向連結和標籤功能進行深度分析。');
+        }
+
+        // 應用程式啟動
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html> 添加用戶訊息
+            addMessage('user', message);
+            input.value = '';
+            input.style.height = 'auto';
+
+            // 更新統計資料
+            conversationData.messages.push({
+                role: 'user',
+                content: message,
+                timestamp: new Date().toISOString()
+            });
+            
+            updateMessageCount();
+            analyzeUserInput(message);
+
+            // 顯示打字指示器
+            showTypingIndicator();
+
+            // 模擬助理回應
+            setTimeout(async () => {
+                const response = await generateAssistantResponse(message);
+                hideTypingIndicator();
+                addMessage('assistant', response);
+                
+                conversationData.messages.push({
+                    role: 'assistant',
+                    content: response,
+                    timestamp: new Date().toISOString()
+                });
+
+                updateAnalysisPanel();
+                enableExportButton();
+            }, 1500 + Math.random() * 1000);
+        }
+
+        // 添加訊息到對話容器
+        function addMessage(role, content) {
+            const container = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-TW', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            messageDiv.innerHTML = `
+                <div>${content}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // 顯示打字指示器
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'flex';
+            document.getElementById('sendBtn').disabled = true;
+        }
+
+        // 隱藏打字指示器
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('sendBtn').disabled = false;
+        }
+
+        // 分析用戶輸入
+        function analyzeUserInput(message) {
+            // 情緒分析
+            let emotionalState = analyzeEmotion(message);
+            conversationData.psychologicalAnalysis.mood = emotionalState;
+
+            // 認知複雜度分析
+            let cognitiveLevel = analyzeCognitiveComplexity(message);
+            conversationData.psychologicalAnalysis.cognitiveComplexity = cognitiveLevel;
+
+            // 自省深度分析
+            let reflectionLevel = analyzeReflectionDepth(message);
+            conversationData.psychologicalAnalysis.reflectionDepth = reflectionLevel;
+
+            // 提取心理標籤
+            let tags = extractPsychologyTags(message);
+            conversationData.psychologicalAnalysis.tags = 
+                [...new Set([...conversationData.psychologicalAnalysis.tags, ...tags])];
+        }
+
+        // 情緒分析
+        function analyzeEmotion(text) {
+            const emotions = psychologyKeywords.emotions;
+            let positiveCount = 0;
+            let negativeCount = 0;
+            let complexCount = 0;
+
+            emotions.positive.forEach(word => {
+                if (text.includes(word)) positiveCount++;
+            });
+            emotions.negative.forEach(word => {
+                if (text.includes(word)) negativeCount++;
+            });
+            emotions.complex.forEach(word => {
+                if (text.includes(word)) complexCount++;
+            });
+
+            if (complexCount > 0) return '複雜情緒';
+            if (positiveCount > negativeCount) return '正向情緒';
+            if (negativeCount > positiveCount) return '負向情緒';
+            return '平靜';
+        }
+
+        // 認知複雜度分析
+        function analyzeCognitiveComplexity(text) {
+            const complexityIndicators = ['因為', '所以', '但是', '然而', '另一方面', '同時', '相對', '比較'];
+            let complexityScore = 0;
+
+            complexityIndicators.forEach(indicator => {
+                if (text.includes(indicator)) complexityScore++;
+            });
+
+            if (text.length > 200) complexityScore++;
+            if ((text.match(/[？?]/g) || []).length > 1) complexityScore++;
+
+            if (complexityScore >= 3) return '高度';
+            if (complexityScore >= 1) return '中等';
+            return '基礎';
+        }
+
+        // 自省深度分析
+        function analyzeReflectionDepth(text) {
+            const reflectionWords = psychologyKeywords.cognition.reflection;
+            let reflectionScore = 0;
+
+            reflectionWords.forEach(word => {
+                if (text.includes(word)) reflectionScore++;
+            });
+
+            const selfReferences = (text.match(/我覺得|我認為|我發現|我意識到/g) || []).length;
+            reflectionScore += selfReferences;
+
+            if (reflectionScore >= 3) return '深度自省';
+            if (reflectionScore >= 1) return '中度思考';
+            return '表面描述';
+        }
+
+        // 提取心理標籤
+        function extractPsychologyTags(text) {
+            const tags = [];
+            
+            if (text.includes('成長') || text.includes('學習')) tags.push('個人成長');
+            if (text.includes('關係') || text.includes('朋友') || text.includes('家人')) tags.push('人際關係');
+            if (text.includes('工作') || text.includes('職場')) tags.push('職業發展');
+            if (text.includes('焦慮') || text.includes('壓力')) tags.push('情緒調節');
+            if (text.includes('目標') || text.includes('計畫')) tags.push('目標設定');
+            if (text.includes('價值') || text.includes('意義')) tags.push('價值觀探索');
+
+            return tags;
+        }
+
+        // 生成助理回應
+        async function generateAssistantResponse(userMessage) {
+            const responses = [
+                `我能感受到您在表達中的真誠。這種${conversationData.psychologicalAnalysis.reflectionDepth}讓我看到您對自我的關注。能進一步分享這個想法是如何在您心中形成的嗎？`,
+                
+                `您提到的這個經歷很有意義。從您的描述中，我觀察到您展現出${conversationData.psychologicalAnalysis.cognitiveComplexity}的思維處理能力。這種自我覺察對個人成長很重要。`,
+                
+                `謝謝您的開放分享。您當前的${conversationData.psychologicalAnalysis.mood}狀態反映了內在的某種變化。這樣的情緒體驗告訴您什麼關於自己的訊息？`,
+                
+                `這是很深刻的洞察。我注意到您在思考過程中表現出的自省能力。能談談這個認知對您的日常決策有什麼影響嗎？`,
+                
+                `您的分享讓我看到一個正在成長的心靈。這種${conversationData.psychologicalAnalysis.reflectionDepth}是很珍貴的品質。您覺得這個想法會如何影響您未來的行動？`
+            ];
+
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        // 更新訊息計數
+        function updateMessageCount() {
+            conversationData.statistics.messageCount++;
+            document.getElementById('messageCount').textContent = 
+                Math.ceil(conversationData.statistics.messageCount / 2);
+        }
+
+        // 更新分析面板
+        function updateAnalysisPanel() {
+            document.getElementById('currentMood').textContent = 
+                conversationData.psychologicalAnalysis.mood;
+            document.getElementById('cognitiveLevel').textContent = 
+                conversationData.psychologicalAnalysis.cognitiveComplexity;
+            document.getElementById('reflectionDepth').textContent = 
+                conversationData.psychologicalAnalysis.reflectionDepth;
+
+            // 更新洞察
+            const insights = [
+                `您展現出${conversationData.psychologicalAnalysis.reflectionDepth}，這表明您具備良好的自我覺察能力`,
+                `當前的${conversationData.psychologicalAnalysis.mood}狀態反映了您內在的心理動態`,
+                `${conversationData.psychologicalAnalysis.cognitiveComplexity}思維處理顯示您正在深度處理複雜議題`
+            ];
+
+            document.getElementById('currentInsight').textContent = 
+                insights[Math.floor(Math.random() * insights.length)];
+
+            // 更新標籤
+            const tagsContainer = document.getElementById('psychologyTags');
+            tagsContainer.innerHTML = '';
+            
+            conversationData.psychologicalAnalysis.tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'psychology-tag';
+                tagElement.textContent = tag;
+                tagsContainer.appendChild(tagElement);
+            });
+
+            // 更新統計
+            const messageCount = Math.ceil(conversationData.statistics.messageCount / 2);
+            let analysisDepth = '初步分析';
+            if (messageCount >= 5) analysisDepth = '深度分析';
+            else if (messageCount >= 3) analysisDepth = '中度分析';
+
+            document.getElementById('todayStats').innerHTML = `
+                互動次數：${messageCount}<br>
+                分析深度：${analysisDepth}<br>
+                成長指標：${conversationData.psychologicalAnalysis.tags.length} 個面向
+            `;
+
+            // 更新進度環
+            const progress = Math.min(messageCount * 20, 100);
+            const circumference = 163.4;
+            const offset = circumference - (progress / 100 * circumference);
+            document.getElementById('progressCircle').style.strokeDashoffset = offset;
+        }
+
+        // 啟用匯出按鈕
+        function enableExportButton() {
+            const exportBtn = document.getElementById('exportBtn');
+            if (conversationData.statistics.messageCount >= 2) {
+                exportBtn.disabled = false;
+            }
+        }
+
+        // 生成 Obsidian 日記
+        function generateObsidianEntry() {
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toLocaleTimeString('zh-TW', { hour12: false });
+
+            // 生成 YAML 前置資料
+            const yamlFrontMatter = `---
+date: ${dateStr}
+time: ${timeStr}
+mood: ${conversationData.psychologicalAnalysis.mood}
+cognitive_complexity: ${conversationData.psychologicalAnalysis.cognitiveComplexity}
+reflection_depth: ${conversationData.psychologicalAnalysis.reflectionDepth}
+tags: [${conversationData.psychologicalAnalysis.tags.map(tag => `"${tag}"`).join(', ')}]
+session_id: ${dateStr}_${timeStr.replace(/:/g, '')}
+message_count: ${Math.ceil(conversationData.statistics.messageCount / 2)}
+psychological_growth: true
+---`;
+
+            // 生成對話內容
+            let conversationContent = '\n## 💭 今日心理探索對話\n\n';
+            
+            conversationData.messages.forEach((msg, index) => {
+                if (msg.role === 'user') {
+                    conversationContent += `### 🗨️ 我的分享 ${Math.ceil((index + 1) / 2)}\n\n`;
+                    conversationContent += `${msg.content}\n\n`;
+                } else if (msg.role === 'assistant') {
+                    conversationContent += `### 🤝 深度回應\n\n`;
+                    conversationContent += `${msg.content}\n\n`;
+                }
+            });
+
+            // 生成心理分析總結
+            const analysisSection = `
+## 📊 心理狀態分析
+
+**情緒狀態：** ${conversationData.psychologicalAnalysis.mood}
+**思維複雜度：** ${conversationData.psychologicalAnalysis.cognitiveComplexity}
+**自省深度：** ${conversationData.psychologicalAnalysis.reflectionDepth}
+
+### 🏷️ 心理成長標籤
+${conversationData.psychologicalAnalysis.tags.map(tag => `- #${tag.replace(/\s+/g, '_')}`).join('\n')}
+
+### 🌱 成長洞察
+- 今日展現了${conversationData.psychologicalAnalysis.reflectionDepth}的自我探索能力
+- 情緒狀態呈現${conversationData.psychologicalAnalysis.mood}，反映當前心理動態
+- 思維處理達到${conversationData.psychologicalAnalysis.cognitiveComplexity}水平，顯示認知發展狀況
+
+## 📈 成長追蹤指標
+
+**互動深度：** ${Math.ceil(conversationData.statistics.messageCount / 2)} 回合
+**探討主題：** ${conversationData.psychologicalAnalysis.tags.length} 個面向
+**記錄時間：** ${timeStr}
+
+---
+
+## 🔗 相關連結
+- [[心理成長日記索引]]
+- [[${conversationData.psychologicalAnalysis.mood}情緒探索]]
+- [[${conversationData.psychologicalAnalysis.reflectionDepth}自省記錄]]
+
+> 💡 這份記錄由 AI 心理成長追蹤系統自動生成，旨在協助您建立持續的自我覺察和成長軌跡。
+`;
+
+            const fullContent = yamlFrontMatter + conversationContent + analysisSection;
+
+            // 下載檔案
+            const blob = new Blob([fullContent], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `心理成長日記_${dateStr}_${timeStr.replace(/:/g, '')}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // 顯示成功訊息
+            alert('✅ Obsidian 日記已生成並下載！\n\n請將此檔案放入您的 Obsidian vault 中，即可開始使用雙向連結和標籤功能進行深度分析。');
+        }
+
+        // 應用程式啟動
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
